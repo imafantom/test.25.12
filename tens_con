@@ -1,99 +1,13 @@
 import streamlit as st
 import random
 
-# ------------------------------------
-# 1) PAGE CONFIG (No 'theme' param)
-# ------------------------------------
+##############################################################################
+# 1. PAGE CONFIG  -- (No 'theme' dict to avoid TypeError on older Streamlit)
+##############################################################################
 st.set_page_config(
     page_title="Grammar Genius App",
     layout="wide"
 )
-
-# ------------------------------------
-# 2) SOME DUMMY SESSION STATES
-# ------------------------------------
-if "selected_item_key" not in st.session_state:
-    st.session_state.selected_item_key = None
-if "answers" not in st.session_state:
-    st.session_state.answers = []
-if "submitted_questions" not in st.session_state:
-    st.session_state.submitted_questions = set()
-
-# ------------------------------------
-# 3) DEFINE TWO CSS THEMES
-# ------------------------------------
-DARK_CSS = """
-<style>
-/* Dark theme: black main background, dark blue sidebar, white text, orange headings */
-body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBody"] {
-    background-color: #000000 !important; /* black */
-    color: #ffffff !important; /* white text */
-}
-[data-testid="stSidebar"] {
-    background-color: #013369 !important; /* dark blue sidebar */
-    color: #ffffff !important;
-}
-h1, h2, h3 {
-    color: #ff5722 !important; /* orange headings */
-    font-family: "Trebuchet MS", sans-serif;
-}
-main > div {
-    padding-top: 20px;
-}
-</style>
-"""
-
-LIGHT_CSS = """
-<style>
-/* Light theme: white main background, lighter sidebar, black text, orange headings */
-body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBody"] {
-    background-color: #ffffff !important; /* white main background */
-    color: #000000 !important; /* black text */
-}
-[data-testid="stSidebar"] {
-    background-color: #f0f0f0 !important; /* light grey sidebar */
-    color: #000000 !important;
-}
-h1, h2, h3 {
-    color: #ff5722 !important; /* keep headings orange */
-    font-family: "Trebuchet MS", sans-serif;
-}
-main > div {
-    padding-top: 20px;
-}
-</style>
-"""
-
-# ------------------------------------
-# 4) THEME TOGGLE IN SIDEBAR
-# ------------------------------------
-st.sidebar.title("Grammar Genius")
-theme_choice = st.sidebar.radio("Choose a Theme:", ["Dark", "Light"], index=0)
-
-# Based on user’s choice, apply CSS
-if theme_choice == "Dark":
-    st.markdown(DARK_CSS, unsafe_allow_html=True)
-else:
-    st.markdown(LIGHT_CSS, unsafe_allow_html=True)
-
-# ------------------------------------
-# 5) DEMO LOGIC
-# ------------------------------------
-def show_welcome():
-    st.title("Welcome Screen")
-    st.write("This is a demo showing two themes. Toggle 'Dark' or 'Light' in the sidebar.")
-
-def show_questions():
-    st.title("Question Screen")
-    st.write("Here you'd show grammar instructions, usage examples, etc.")
-    st.write("The rest of your Tenses/Conditionals code would go here...")
-
-# Dummy logic for demonstration
-if st.session_state.selected_item_key is None:
-    show_welcome()
-else:
-    show_questions()
-
 
 ##############################################################################
 # 2. SESSION STATE
@@ -135,35 +49,51 @@ if "randomized_messages" not in st.session_state:
     st.session_state.randomized_messages = motivational_sentences
 
 ##############################################################################
-# 3. CUSTOM CSS
-#    Force black main background, white text, dark-blue sidebar, orange headings
+# 3. DEFINE TWO CSS THEMES (Dark, Light)
 ##############################################################################
-st.markdown("""
+DARK_CSS = """
 <style>
-/* Main page background black, default text white */
+/* Dark theme: black main background, dark-blue sidebar, white text, orange headings */
+
 body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBody"] {
-    background-color: #000000 !important;
+    background-color: #000000 !important; 
     color: #ffffff !important;
 }
-
-/* Dark blue sidebar, white text */
 [data-testid="stSidebar"] {
-    background-color: #013369 !important;
+    background-color: #013369 !important; 
     color: #ffffff !important;
 }
-
-/* Headings remain orange (#ff5722) */
 h1, h2, h3 {
     color: #ff5722 !important;
     font-family: "Trebuchet MS", sans-serif;
 }
-
-/* Tweak the main container spacing if needed */
 main > div {
     padding-top: 20px;
 }
 </style>
-""", unsafe_allow_html=True)
+"""
+
+LIGHT_CSS = """
+<style>
+/* Light theme: white main background, light grey sidebar, black text, orange headings */
+
+body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBody"] {
+    background-color: #ffffff !important; 
+    color: #000000 !important;
+}
+[data-testid="stSidebar"] {
+    background-color: #f0f0f0 !important;
+    color: #000000 !important;
+}
+h1, h2, h3 {
+    color: #ff5722 !important;
+    font-family: "Trebuchet MS", sans-serif;
+}
+main > div {
+    padding-top: 20px;
+}
+</style>
+"""
 
 ##############################################################################
 # 4. TENSES AND CONDITIONALS DATA -- Insert your actual data below
@@ -706,14 +636,12 @@ conditionals_data = {
 # 5. HELPER FUNCTIONS
 ##############################################################################
 def reset_questions():
-    """Reset answers, submitted questions, and review mode. Also reshuffle motivational messages."""
     st.session_state.answers = []
     st.session_state.submitted_questions = set()
     st.session_state.review_mode = False
     random.shuffle(st.session_state.randomized_messages)
 
 def get_current_data():
-    """Return the dictionary and item key for whichever Tense/Conditional is chosen."""
     if st.session_state.selected_category == "Tenses":
         if st.session_state.selected_item_key:
             return tenses_data, st.session_state.selected_item_key
@@ -726,12 +654,15 @@ def get_current_data():
             return None, None
 
 ##############################################################################
-# 6. SIDEBAR
+# 6. SIDEBAR: Category & Theme Toggles
 ##############################################################################
 st.sidebar.title("Grammar Categories")
+
+# Category toggle
 category = st.sidebar.radio("Select a category:", ["Tenses", "Conditionals"])
 st.session_state.selected_category = category
 
+# Item selection
 if st.session_state.selected_category == "Tenses":
     st.sidebar.subheader("Select a Tense")
     tense_options = ["Select a tense..."] + [f"{key}. {tenses_data[key]['name']}" for key in tenses_data]
@@ -757,11 +688,17 @@ else:
         st.session_state.selected_item_key = None
         reset_questions()
 
+# Theme toggle
+theme_choice = st.sidebar.radio("Choose a Theme:", ["Dark", "Light"], index=0)
+if theme_choice == "Dark":
+    st.markdown(DARK_CSS, unsafe_allow_html=True)
+else:
+    st.markdown(LIGHT_CSS, unsafe_allow_html=True)
+
 ##############################################################################
 # 7. SCREENS
 ##############################################################################
 def show_welcome():
-    """Welcome screen, no name input, no balloons."""
     st.title("Welcome to the Grammar Genius Game! 🎉✨🎮")
     st.write("""
     Get ready to boost your English grammar skills in a fun and interactive way!
@@ -776,16 +713,16 @@ def show_welcome():
     """)
 
 def show_review(data_dict, item_key):
-    """Review screen: show answered questions, each with a trophy 🏆."""
     st.header("Review Your Answers")
     usage_cases = data_dict[item_key]["usage_cases"]
     for i, case in enumerate(usage_cases):
         answer_key = f"answer_{item_key}_{i}"
         st.write(f"**{case['title']}**")
         st.write(f"Question: {case['question']}")
+        # Mark answers with a trophy
         user_answer = st.session_state.get(answer_key, "")
         st.write(f"Your answer: {user_answer} 🏆")
-    st.write("Feel free to pick another item from the sidebar if you wish.")
+    st.write("Feel free to pick another item from the sidebar if you want.")
 
 def show_explanation_and_questions():
     data_dict, item_key = get_current_data()
@@ -812,40 +749,46 @@ def show_explanation_and_questions():
     total_questions = len(usage_cases)
     answered_count = len(st.session_state.answers)
 
+    # If user is in review mode
     if st.session_state.review_mode:
         show_review(data_dict, item_key)
         return
 
     st.write("### Practice Questions")
 
+    # Metrics
     colA, colB = st.columns(2)
     colA.metric("Questions Answered", f"{answered_count}")
     colB.metric("Total Questions", f"{total_questions}")
 
+    # Progress bar
     progress_val = int((answered_count / total_questions) * 100)
     st.progress(progress_val)
 
+    # If completed all questions
     if answered_count == total_questions:
         st.success(f"You've answered all 10 questions for {info['name']}!")
-        # Show badge message with trophy
+        # Show a badge with a trophy
         st.markdown(f"**Badge Unlocked:** *{info['name']} Expert!* 🏆")
 
         if st.button("Review Your Answers"):
             st.session_state.review_mode = True
         return
 
-    # Show each question in columns
+    # Display questions
     for i, case in enumerate(usage_cases):
         answer_key = f"answer_{item_key}_{i}"
         submit_key = f"submit_{item_key}_{i}"
 
         if submit_key in st.session_state.submitted_questions:
+            # Already answered
             st.write(f"**{case['title']}**")
             st.write(case["question"])
             user_answer = st.session_state.get(answer_key, "")
             st.write(f"Your answer: {user_answer}")
             continue
 
+        # Two-column question layout
         q_col, a_col = st.columns([2, 3])
         with q_col:
             st.write(f"**{case['title']}**")
@@ -863,7 +806,7 @@ def show_explanation_and_questions():
                 else:
                     msg = st.session_state.randomized_messages[-1]
 
-                # Show the message
+                # Show the message without name input
                 if msg[0].isupper():
                     new_msg = f"{msg[0].lower() + msg[1:]}"
                 else:
